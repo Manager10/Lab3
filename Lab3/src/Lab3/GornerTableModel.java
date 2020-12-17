@@ -29,7 +29,7 @@ public class GornerTableModel  extends AbstractTableModel
     }
     public int getColumnCount() {
 // В данной модели два столбца
-        return 2;
+        return 3;
     }
     public int getRowCount()
     {
@@ -44,7 +44,7 @@ public class GornerTableModel  extends AbstractTableModel
         {
             case 0:
                 return x;
-            default:
+            case 1:
             {
                 result[0] = 0.0;
                 for(int i = 0; i < coefficients.length; i++)
@@ -53,6 +53,13 @@ public class GornerTableModel  extends AbstractTableModel
                 }
                 return result[0];
             }
+            default:
+                int temp1 = (int)result[0];
+                int temp2 = (int)(result[0] * 10);
+                if (temp1 % 10 == temp2 % 10)
+                    return true;
+                else
+                    return false;
         }
     }
     public String getColumnName(int col)
@@ -62,13 +69,18 @@ public class GornerTableModel  extends AbstractTableModel
             case 0:
 // Название 1-го столбца
                 return "Значение X";
-            default:
+            case 1:
 // Название 2-го столбца
                 return "Значение многочлена";
+            default:
+                return "Ограниченная симметрия";
         }
     }
     public Class<?> getColumnClass(int col)
     {
+        if (col == 2)
+            return Boolean.class;
+        else
         return Double.class;
     }
 }
