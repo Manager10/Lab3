@@ -106,7 +106,144 @@ public class MainFrame extends JFrame
 
         saveToGraphicsMenuItem = fileMenu.add(saveToGraphicsAction);
         saveToGraphicsMenuItem.setEnabled(false);
+        Action searchValueAction = new AbstractAction("Найти значение многочлена")
+        {
+            public void actionPerformed(ActionEvent event)
+            {
+                renderer.setNeedle(null);
+                String value = JOptionPane.showInputDialog(MainFrame.this, "Введите значение для поиска",
+                        "Поиск значения", JOptionPane.QUESTION_MESSAGE);
+// Установить введенное значение в качестве иголки
+                renderer.setNeedle(value);
+                getContentPane().repaint();
+            }
+        };
+        searchValueMenuItem = tableMenu.add(searchValueAction);
+        searchValueMenuItem.setEnabled(false);
+
+        Action aboutAction = new AbstractAction("О программе")
+        {
+            public void actionPerformed(ActionEvent event)
+            {
+                JOptionPane.showMessageDialog(MainFrame.this, "Автор: Булынко Сергей, 6 группа");
+            }
+        };
+        aboutMenuItem = aboutMenu.add(aboutAction);
+
+        JLabel labelForFrom = new JLabel("X изменяется на интервале от:");
+        textFieldFrom = new JTextField("0.0", 10);
+        textFieldFrom.setMaximumSize(textFieldFrom.getPreferredSize());
+
+        JLabel labelForTo = new JLabel("до:");
+        textFieldTo = new JTextField("1.0", 10);
+        textFieldTo.setMaximumSize(textFieldTo.getPreferredSize());
+        JLabel labelForStep = new JLabel("с шагом:");
+        textFieldStep = new JTextField("0.1", 10);
+        textFieldStep.setMaximumSize(textFieldStep.getPreferredSize());
+
+        Box hboxRange = Box.createHorizontalBox();
+        hboxRange.setBorder(BorderFactory.createBevelBorder(1));
+        hboxRange.add(Box.createHorizontalGlue());
+        hboxRange.add(labelForFrom);
+        hboxRange.add(Box.createHorizontalStrut(10));
+        hboxRange.add(textFieldFrom);
+        hboxRange.add(Box.createHorizontalStrut(20));
+        hboxRange.add(labelForTo);
+        hboxRange.add(Box.createHorizontalStrut(10));
+        hboxRange.add(textFieldTo);
+        hboxRange.add(Box.createHorizontalStrut(20));
+        hboxRange.add(labelForStep);
+        hboxRange.add(Box.createHorizontalStrut(10));
+        hboxRange.add(textFieldStep);
+        hboxRange.add(Box.createHorizontalGlue());
+
+// Установить предпочтительный размер области равным удвоенному
+// минимальному, чтобы при компоновке область совсем не сдавили
+        hboxRange.setPreferredSize(new Dimension(new Double(hboxRange.getMaximumSize().getWidth()).intValue(),
+                new Double(hboxRange.getMinimumSize().getHeight()).intValue()*2));
+
+        getContentPane().add(hboxRange, BorderLayout.NORTH);
+        JButton buttonCalc = new JButton("Вычислить");
+        buttonCalc.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent ev)
+            {
+                try
+                {
+                    Double from = Double.parseDouble(textFieldFrom.getText());
+                    Double to = Double.parseDouble(textFieldTo.getText());
+                    Double step = Double.parseDouble(textFieldStep.getText());
+                    // На основе считанных данных создать новый экземпляр модели таблицы
+                    data = new GornerTableModel(from, to, step, MainFrame.this.coefficients);
+                    // Создать новый экземпляр таблицы
+                    JTable table = new JTable(data);
+                    // Установить в качестве визуализатора ячеек для класса Double разработанный визуализатор
+                    table.setDefaultRenderer(Double.class, renderer);
+                    // Установить размер строки таблицы в 30 пикселов
+                    table.setRowHeight(30);
+                    // Удалить все вложенные элементы из контейнера hBoxResult
+                    hBoxResult.removeAll();
+                    // Добавить в hBoxResult таблицу, "обѐрнутую" в панель с полосами прокрутки
+                    hBoxResult.add(new JScrollPane(table));
+                    // Обновить область содержания главного окна
+                    getContentPane().validate();
+                    // Пометить ряд элементов меню как доступных
+                    saveToTextMenuItem.setEnabled(true);
+                    saveToGraphicsMenuItem.setEnabled(true);
+                    searchValueMenuItem.setEnabled(true);
+                }
+                catch (NumberFormatException ex)
+                {
+                    // В случае ошибки преобразования чисел показать сообщение об ошибке
+                    JOptionPane.showMessageDialog(MainFrame.this,
+                            "Ошибка в формате записи числа с плавающей точкой", "Ошибочный формат числа",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+
+        JButton buttonReset = new JButton("Очистить поля");
+        buttonReset.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent ev)
+            {
+                textFieldFrom.setText("0.0");
+                textFieldTo.setText("0.0");
+                textFieldStep.setText("0.0");
+                // Удалить все вложенные элементы контейнера
+                hBoxResult.removeAll();
+                // Добавить в контейнер пустую панель
+                hBoxResult.add(new JPanel());
+                // Пометить элементы меню как недоступные
+                saveToTextMenuItem.setEnabled(false);
+                saveToGraphicsMenuItem.setEnabled(false);
+                searchValueMenuItem.setEnabled(false);
+                // Обновить область содержания главного окна
+                getContentPane().validate();
+            }
+        });
+// Поместить созданные кнопки в контейнер
+        Box hboxButtons = Box.createHorizontalBox();
+        hboxButtons.setBorder(BorderFactory.createBevelBorder(1));
+        hboxButtons.add(Box.createHorizontalGlue());
+        hboxButtons.add(buttonCalc);
+        hboxButtons.add(Box.createHorizontalStrut(30));
+        hboxButtons.add(buttonReset);
+        hboxButtons.add(Box.createHorizontalGlue());
+// Установить предпочтительный размер области равным удвоенному минимальному, чтобы при
+// компоновке окна область совсем не сдавили
+        hboxButtons.setPreferredSize(new Dimension(new
+                Double(hboxButtons.getMaximumSize().getWidth()).intValue(), new
+                Double(hboxButtons.getMinimumSize().getHeight()).intValue()*2));
+// Разместить контейнер с кнопками в нижней (южной) области граничной компоновки
+        getContentPane().add(hboxButtons, BorderLayout.SOUTH);
+// Область для вывода результата пока что пустая
+        hBoxResult = Box.createHorizontalBox();
+        hBoxResult.add(new JPanel());
+// Установить контейнер hBoxResult в главной (центральной) области граничной компоновки
+        getContentPane().add(hBoxResult, BorderLayout.CENTER);
     }
+
         protected void saveToGraphicsFile(File selectedFile)
         {
             try
@@ -164,5 +301,39 @@ public class MainFrame extends JFrame
                 // обрабатывать, так как мы файл создаѐм, а не открываем
             }
         }
+        
+    public static void main(String[] args)
+    {
+        // Если не задано ни одного аргумента командной строки -
+        // Продолжать вычисления невозможно, коэффиценты неизвестны
+        if (args.length==0)
+        {
+            System.out.println("Невозможно табулировать многочлен, для которого не задано ни одного коэффициента!");
+            System.exit(-1);
+        }
+        // Зарезервировать места в массиве коэффициентов столько, сколько аргументов командной строки
+        Double[] coefficients = new Double[args.length];
+        int i = 0;
+        try
+        {
+            // Перебрать аргументы, пытаясь преобразовать их в Double
+            for (String arg: args)
+            {
+                coefficients[i++] = Double.parseDouble(arg);
+            }
+        }
+        catch (NumberFormatException ex)
+        {
+            // Если преобразование невозможно - сообщить об ошибке и завершиться
+            System.out.println("Ошибка преобразования строки '" +
+                    args[i] + "' в число типа Double");
+            System.exit(-2);
+        }
+        // Создать экземпляр главного окна, передав ему коэффициенты
+        MainFrame frame = new MainFrame(coefficients);
+        // Задать действие, выполняемое при закрытии окна
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
 }
 
